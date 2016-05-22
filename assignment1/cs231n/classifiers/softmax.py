@@ -29,7 +29,31 @@ def softmax_loss_naive(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  num_train = X.shape[0]
+  num_class = W.shape[1]
+  for i in xrange(num_train):
+    score = X[i].dot(W)
+    exp_sum = 0
+    max_score = np.max(score)
+    for j in xrange(num_class):
+      exp = np.exp(score[j] - max_score)
+      exp_sum += exp
+      if j == y[i]:
+        exp_y = exp
+    # compute the loss
+    loss += -np.log(exp_y / exp_sum)
+    # compute the gradient
+    for j in xrange(num_class):
+      weight = np.exp(score[j] - max_score) / exp_sum
+      if j == y[i]:
+        weight -= 1
+      dW[:, j] += weight * X[i]
+    
+  # compute average loss and gradient with regularization
+  loss /= num_train
+  loss += 0.5 * reg * np.sum(np.square(W))
+  dW /= num_train
+  dW += reg * W
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
@@ -53,7 +77,22 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  num_train = X.shape[0]
+  scores = X.dot(W)
+  scores -= np.max(scores, axis=1)[:, np.newaxis]
+  exp_scores = np.exp(scores)
+  exp_sum = np.sum(exp_scores, axis=1)
+  exp_y = exp_scores[np.arange(num_train), y]
+  # compute loss
+  loss += np.sum(-np.log(exp_y / exp_sum))
+  loss /= num_train
+  loss += 0.5 * reg * np.sum(np.square(W))
+  # compute gradient
+  probs = exp_scores / exp_sum[:, np.newaxis]
+  probs[np.arange(num_train), y] -= 1
+  dW += X.T.dot(probs)
+  dW /= num_train
+  dW += reg * W
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
