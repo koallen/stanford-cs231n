@@ -165,6 +165,13 @@ class TwoLayerNet(object):
     train_acc_history = []
     val_acc_history = []
 
+    # momentum
+    v1 = 0
+    v2 = 0
+    v3 = 0
+    v4 = 0
+    mu = 0.9
+
     for it in xrange(num_iters):
       X_batch = None
       y_batch = None
@@ -190,10 +197,14 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      self.params["W1"] -= learning_rate * grads["W1"]
-      self.params["b1"] -= learning_rate * grads["b1"]
-      self.params["W2"] -= learning_rate * grads["W2"]
-      self.params["b2"] -= learning_rate * grads["b2"]
+      v1 = mu * v1 - learning_rate * grads["W1"]
+      self.params["W1"] += v1
+      v2 = mu * v2 - learning_rate * grads["b1"]
+      self.params["b1"] += v2
+      v3 = mu * v3 - learning_rate * grads["W2"]
+      self.params["W2"] += v3
+      v4 = mu * v4 - learning_rate * grads["b2"]
+      self.params["b2"] += v4
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
